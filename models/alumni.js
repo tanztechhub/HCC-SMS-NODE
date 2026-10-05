@@ -11,15 +11,17 @@ const hccSmsModel = (name, schema, collection) => {
 };
 
 const AlumniSchema = new mongoose.Schema({
+  recordOrigin: { type: String, enum: ["admission", "masterlist"], default: "admission" },
+  importSource: { type: mongoose.Schema.Types.Mixed },
   academicYear: { type: String, required: true},
   courseName: { type: String, required: true },
   admissionNumber: { type: String, required: true, unique: true },
-  admissionDate: { type: Date, required: true },
-  upfrontFee: { type: Number, required: true },
+  admissionDate: { type: Date, required: function () { return this.recordOrigin !== "masterlist"; } },
+  upfrontFee: { type: Number, required: function () { return this.recordOrigin !== "masterlist"; } },
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   gender: { type: String, required: true },
-  dateOfBirth: { type: Date, required: true },
+  dateOfBirth: { type: Date, required: function () { return this.recordOrigin !== "masterlist"; } },
   religion: String,
   nationality: String,
   email: { type: String, required: true },

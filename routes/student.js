@@ -1271,6 +1271,8 @@ router.post('/:studentId/graduate', asyncHandler(async (req, res) => {
 
     // Create alumni record with selected fields
     const alumniData = {
+      recordOrigin: student.recordOrigin,
+      importSource: student.importSource,
       academicYear: student.academicYear,
       courseName: student.courseName,
       admissionNumber: student.admissionNumber,

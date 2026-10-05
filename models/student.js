@@ -48,6 +48,8 @@ const feeUpdateSchema = new mongoose.Schema({
 
 
 const studentSchema = new mongoose.Schema({
+  recordOrigin: { type: String, enum: ["admission", "masterlist"], default: "admission" },
+  importSource: { type: mongoose.Schema.Types.Mixed },
   academicYear: { type: String, required: false },
   course: { type: String, required: true },
   courseName: { type: String, required: true },
@@ -67,14 +69,14 @@ const studentSchema = new mongoose.Schema({
   },
   tutorName: { type: String, required: false },
   gender: { type: String, required: true },
-  dateOfBirth: { type: Date, required: true },
+  dateOfBirth: { type: Date, required: function () { return this.recordOrigin !== "masterlist"; } },
   startDate: { type: Date, required: true },
   assignedCohort: { type: Date, required: false },
   religion: { type: String, required: false },
   nationality: { type: String, required: false },
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true },
   phoneNumber: { type: String, required: true },
-  nationalId: { type: String, required: true, unique: true },
+  nationalId: { type: String, required: true },
   emergencyContact: {
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
@@ -120,6 +122,10 @@ const studentSchema = new mongoose.Schema({
   }],
   borrowedBooks: [borrowedBooks],
 }, { timestamps: true });
+
+// Preserve ordinary admission uniqueness while allowing historical enrolments to share identity fields.
+studentSchema.index({ email: 1 }, { unique: true, name: "email_admission_unique", partialFilterExpression: { recordOrigin: "admission" } });
+studentSchema.index({ nationalId: 1 }, { unique: true, partialFilterExpression: { recordOrigin: "admission" } });
 
 const Student = hccSmsConnection.models.Student || hccSmsModel('Student', studentSchema);
 
